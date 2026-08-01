@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+  <aside class="sidebar glass-panel">
+    <a class="sidebar-link" href="{% url 'dashboard' %}">🏠 Dashboard</a>
+    <a class="sidebar-link" href="{% url 'file_explorer' %}">🗂️ My Files</a>
+    <a class="sidebar-link" href="{% url 'group_list' %}">👥 Groups</a>
+    <a class="sidebar-link active" href="{% url 'trash' %}">🗑️ Trash</a>
+    <a class="sidebar-link" href="{% url 'notifications' %}">🔔 Notifications</a>
+    <a class="sidebar-link" href="{% url 'profile' %}">👤 Profile</a>
+  </aside>
+
+  <div>
+    <h2 class="page-title">Trash</h2>
+    <p class="page-subtitle">Deleted files stay here for 30 days before permanent removal.</p>
+
+    {% if files %}
+      <div class="file-grid">
+        {% for f in files %}
+          <div class="file-card">
+            <div class="file-icon">🗑️</div>
+            <div class="file-name" title="{{ f.file_name }}">{{ f.file_name }}</div>
+            <div class="file-meta">{{ f.file_size|filesizeformat }} &middot; {{ f.days_until_purge }} days left</div>
+            <div class="file-actions">
+              <form method="post" action="{% url 'file_restore' f.pk %}" class="btn-action-wrap">
+                {% csrf_token %}
+                <button class="btn btn-primary btn-sm btn-full" type="submit">Restore</button>
+              </form>
+              <form method="post" action="{% url 'file_permanent_delete' f.pk %}" class="btn-action-wrap" onsubmit="return confirm('Permanently delete this file? This cannot be undone.');">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm btn-full" type="submit">Delete forever</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state glass-card">
+        <div class="icon">✨</div>
+        <p>Trash is empty. All clean!</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

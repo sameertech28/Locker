@@ -1,0 +1,33 @@
+{% load static %}
+<div class="file-card">
+  <form method="post" action="{% url 'toggle_favorite' f.pk %}" style="display:inline;">
+    {% csrf_token %}
+    <button type="button" class="fav-star {% if f.is_favorite %}active{% endif %}" data-url="{% url 'toggle_favorite' f.pk %}" title="Favorite">★</button>
+  </form>
+  <div class="file-icon">
+    {% if f.file_type == "image" %}🖼️
+    {% elif f.file_type == "video" %}🎬
+    {% elif f.file_type == "audio" %}🎵
+    {% elif f.file_type == "archive" %}📦
+    {% elif f.file_type == "document" %}📄
+    {% else %}🗃️{% endif %}
+  </div>
+  <div class="file-name" title="{{ f.file_name }}">{{ f.file_name }}</div>
+  <div class="file-meta">{{ f.file_size|filesizeformat }} &middot; {{ f.uploaded_at|date:"M j, Y" }}</div>
+  <div class="file-actions" style="flex-direction: column;">
+    <div style="display:flex; gap:8px; width:100%; margin-bottom:8px;">
+      <a href="{{ f.file.url }}" target="_blank" class="btn-action-wrap" style="flex:1;">
+        <button type="button" class="btn btn-primary btn-sm btn-full">View</button>
+      </a>
+      <a href="{% url 'file_download' f.pk %}" class="btn-action-wrap" style="flex:1;">
+        <button type="button" class="btn btn-ghost btn-sm btn-full">Download</button>
+      </a>
+    </div>
+    {% if f.uploaded_by == user %}
+      <form method="post" action="{% url 'file_delete' f.pk %}" style="width:100%;" onsubmit="return confirm('Move this file to trash?');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger btn-sm btn-full">Delete</button>
+      </form>
+    {% endif %}
+  </div>
+</div>

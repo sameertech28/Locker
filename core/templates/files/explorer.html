@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+  <aside class="sidebar glass-panel">
+    <a class="sidebar-link" href="{% url 'dashboard' %}">🏠 Dashboard</a>
+    <a class="sidebar-link active" href="{% url 'file_explorer' %}">🗂️ My Files</a>
+    <a class="sidebar-link" href="{% url 'group_list' %}">👥 Groups</a>
+    <a class="sidebar-link" href="{% url 'trash' %}">🗑️ Trash</a>
+    <a class="sidebar-link" href="{% url 'notifications' %}">🔔 Notifications</a>
+    <a class="sidebar-link" href="{% url 'profile' %}">👤 Profile</a>
+
+    <div class="sidebar-storage">
+      <div class="caption">STORAGE USAGE</div>
+      <div class="storage-meter"><div class="storage-meter-fill" style="width:{{ profile.storage_percent }}%;"></div></div>
+      <div class="caption">{{ profile.storage_percent }}% used</div>
+    </div>
+  </aside>
+
+  <div>
+    <h2 class="page-title">My Files</h2>
+    <p class="page-subtitle">Upload, search, and manage your personal files in your secure vault.</p>
+
+    <form method="post" enctype="multipart/form-data" class="upload-section">
+      {% csrf_token %}
+      <div class="dropzone" id="upload-dropzone">
+        <div class="upload-icon">📤</div>
+        {{ form.file }}
+        <p class="dropzone-text"><strong>Drag &amp; drop your file here</strong> or click to browse</p>
+        <p class="caption" data-filename>No file selected</p>
+      </div>
+      <div class="field" style="margin-top:14px;">{{ form.description }}</div>
+      <button type="submit" class="btn btn-primary btn-lg">Upload File</button>
+    </form>
+
+    <div class="filter-bar">
+      <form method="get" class="filter-form">
+        <input type="text" name="q" placeholder="Search files..." value="{{ query }}" class="input-search">
+        <select name="type" onchange="this.form.submit()" class="select-filter">
+          <option value="">All file types</option>
+          <option value="image" {% if file_type == "image" %}selected{% endif %}>Images</option>
+          <option value="video" {% if file_type == "video" %}selected{% endif %}>Videos</option>
+          <option value="audio" {% if file_type == "audio" %}selected{% endif %}>Audio</option>
+          <option value="document" {% if file_type == "document" %}selected{% endif %}>Documents</option>
+          <option value="archive" {% if file_type == "archive" %}selected{% endif %}>Archives</option>
+          <option value="other" {% if file_type == "other" %}selected{% endif %}>Other</option>
+        </select>
+        <select name="sort" onchange="this.form.submit()" class="select-filter">
+          <option value="-uploaded_at" {% if sort == "-uploaded_at" %}selected{% endif %}>Newest first</option>
+          <option value="uploaded_at" {% if sort == "uploaded_at" %}selected{% endif %}>Oldest first</option>
+          <option value="file_name" {% if sort == "file_name" %}selected{% endif %}>Name A-Z</option>
+          <option value="-file_size" {% if sort == "-file_size" %}selected{% endif %}>Largest first</option>
+        </select>
+        <button class="btn btn-ghost" type="submit">Search</button>
+      </form>
+    </div>
+
+    {% if page_obj %}
+      <div class="file-grid">
+        {% for f in page_obj %}
+          {% include "files/_file_card.html" with f=f %}
+        {% endfor %}
+      </div>
+      {% if page_obj.paginator.num_pages > 1 %}
+        <div class="pagination-bar">
+          {% if page_obj.has_previous %}<a href="?page={{ page_obj.previous_page_number }}"><button class="btn btn-ghost btn-sm">Prev</button></a>{% endif %}
+          <span class="caption" style="align-self:center;">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+          {% if page_obj.has_next %}<a href="?page={{ page_obj.next_page_number }}"><button class="btn btn-ghost btn-sm">Next</button></a>{% endif %}
+        </div>
+      {% endif %}
+    {% else %}
+      <div class="empty-state glass-card">
+        <div class="icon">📭</div>
+        <p>No files match your filter. Try a different search or upload something new.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
