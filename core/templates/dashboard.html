@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+  <aside class="sidebar glass-panel">
+    <a class="sidebar-link active" href="{% url 'dashboard' %}">🏠 Dashboard</a>
+    <a class="sidebar-link" href="{% url 'file_explorer' %}">🗂️ My Files</a>
+    <a class="sidebar-link" href="{% url 'group_list' %}">👥 Groups</a>
+    <a class="sidebar-link" href="{% url 'trash' %}">🗑️ Trash</a>
+    <a class="sidebar-link" href="{% url 'notifications' %}">🔔 Notifications</a>
+    <a class="sidebar-link" href="{% url 'profile' %}">👤 Profile</a>
+
+    <div class="sidebar-storage">
+      <div class="caption">STORAGE USAGE</div>
+      <div class="storage-meter"><div class="storage-meter-fill" style="width:{{ profile.storage_percent }}%;"></div></div>
+      <div class="caption">{{ profile.storage_percent }}% used</div>
+    </div>
+  </aside>
+
+  <div>
+    <h2 class="page-title">Welcome back, {{ user.first_name|default:user.username }}</h2>
+    <p class="page-subtitle">Here is a summary of your personal files, groups, and storage activity.</p>
+
+    <div class="grid grid-3 dashboard-stats">
+      <div class="glass-card stat-card">
+        <div class="caption">RECENT FILES</div>
+        <div class="stat-number">{{ recent_files|length }}</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="caption">YOUR GROUPS</div>
+        <div class="stat-number">{{ my_groups|length }}</div>
+      </div>
+      <div class="glass-card stat-card">
+        <div class="caption">UNREAD ALERTS</div>
+        <div class="stat-number">{{ unread_notifications }}</div>
+      </div>
+    </div>
+
+    <div class="section-header">
+      <h3 class="section-title">Recent Files</h3>
+      {% if recent_files %}
+        <a href="{% url 'file_explorer' %}" class="view-all-link">View all files &rarr;</a>
+      {% endif %}
+    </div>
+
+    {% if recent_files %}
+      <div class="file-grid" style="margin-bottom:36px;">
+        {% for f in recent_files %}
+          {% include "files/_file_card.html" with f=f %}
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state glass-card" style="margin-bottom:36px;">
+        <div class="icon">📭</div>
+        <p>No files uploaded yet. <a href="{% url 'file_explorer' %}">Upload your first file</a>.</p>
+      </div>
+    {% endif %}
+
+    <div class="grid grid-2">
+      <div>
+        <div class="section-header">
+          <h3 class="section-title">Your Groups</h3>
+          <a href="{% url 'group_list' %}" class="view-all-link">Manage groups &rarr;</a>
+        </div>
+        {% for g in my_groups %}
+          <div class="glass-card group-list-card">
+            <div>
+              <strong class="group-name">{{ g.name }}</strong>
+              <div class="caption">{{ g.member_count }} member{{ g.member_count|pluralize }}</div>
+            </div>
+            <a href="{% url 'group_detail' g.slug %}"><button class="btn btn-ghost btn-sm">Open</button></a>
+          </div>
+        {% empty %}
+          <div class="glass-card empty-state-sm">
+            <p class="caption">No groups joined yet. <a href="{% url 'group_create' %}">Create a group</a>.</p>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div>
+        <div class="section-header">
+          <h3 class="section-title">Activity & Logs</h3>
+        </div>
+        <div class="glass-card" style="display:flex; align-items:center; justify-content:space-between; padding:24px;">
+          <div>
+            <h4 style="margin:0;">Recent Activity</h4>
+            <p class="caption" style="margin:4px 0 0;">View your recent actions and file history.</p>
+          </div>
+          <button class="btn btn-primary" data-modal-target="#activityModal">View Activity Log</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Activity Modal -->
+<div class="modal-overlay" id="activityModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Recent Activity</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body activity-feed">
+      {% for a in recent_activity %}
+        <div class="activity-item">
+          <span class="badge-pill">{{ a.get_action_display }}</span> <span class="activity-desc">{{ a.description }}</span>
+          <div class="caption">{{ a.timestamp|timesince }} ago</div>
+        </div>
+      {% empty %}
+        <p class="caption">No recent activity recorded.</p>
+      {% endfor %}
+    </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
