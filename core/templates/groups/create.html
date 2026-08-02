@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-shell">
+  <div class="glass-card auth-card" style="max-width:480px;">
+    <h2 style="text-align:center;">Create a group</h2>
+    <p style="text-align:center; margin-bottom:20px;">Spin up a shared space for your team, project, or event.</p>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {% if field.errors %}<ul class="errorlist">{% for e in field.errors %}<li>{{ e }}</li>{% endfor %}</ul>{% endif %}
+        </div>
+      {% endfor %}
+      <button class="btn btn-primary" style="width:100%;" type="submit">Create group</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

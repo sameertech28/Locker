@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="padding-top:28px;">
+  <div class="glass-card" style="margin-bottom:24px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div>
+      <h2 style="margin-bottom:6px;">{{ group.name }}</h2>
+      <p class="caption" style="font-size:14px;">Invite code: <strong style="color:var(--primary);">{{ group.group_code }}</strong> &middot; {{ group.member_count }}/{{ group.max_members }} members</p>
+      <p style="margin-top:8px; font-size:15px;">{{ group.description }}</p>
+    </div>
+    <form method="post" action="{% url 'group_leave' group.slug %}" onsubmit="return confirm('Leave this group?');">
+      {% csrf_token %}
+      <button class="btn btn-ghost" type="submit">Leave group</button>
+    </form>
+  </div>
+
+  <div class="grid grid-2" style="align-items:start;">
+    <div>
+      <h3 class="section-title">Group Files</h3>
+      <form method="post" enctype="multipart/form-data" style="margin-bottom:24px;">
+        {% csrf_token %}
+        <div class="dropzone">
+          <div class="upload-icon">📤</div>
+          {{ form.file }}
+          <p class="dropzone-text"><strong>Drop a file here</strong> or click to browse</p>
+          <p class="caption" data-filename>No file selected</p>
+        </div>
+        <button type="submit" class="btn btn-primary" style="margin-top:12px;">Share with group</button>
+      </form>
+
+      {% if files %}
+        <div class="file-grid">
+          {% for f in files %}
+            {% include "files/_file_card.html" with f=f %}
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="empty-state glass-card"><div class="icon">📭</div><p>No files shared yet.</p></div>
+      {% endif %}
+    </div>
+
+    <div>
+      <h3 class="section-title">Members</h3>
+      <div class="glass-card" style="margin-bottom:24px;">
+        {% for m in memberships %}
+          <div class="member-row">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <div class="avatar-ring">{{ m.user.username|slice:":1"|upper }}</div>
+              <div>
+                <div style="font-weight:500; font-size:15px;">{{ m.user.username }} {% if m.is_admin %}<span class="badge-pill">admin</span>{% endif %}</div>
+                <div class="caption">Joined {{ m.joined_at|date:"M j, Y" }}</div>
+              </div>
+            </div>
+            {% if membership.is_admin and m.user != user %}
+              <form method="post" action="{% url 'group_remove_member' group.slug m.user.id %}" onsubmit="return confirm('Remove this member?');">
+                {% csrf_token %}
+                <button class="btn btn-danger btn-sm" type="submit">Remove</button>
+              </form>
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      {% if membership.is_admin %}
+        <h3 class="section-title">Add a Member</h3>
+        <form method="post" action="{% url 'group_add_member' group.slug %}" style="display:flex; gap:10px; margin-bottom:28px;">
+          {% csrf_token %}
+          <input type="text" name="identifier" placeholder="Username or email" required style="flex:1;">
+          <button class="btn btn-ghost" type="submit">Add</button>
+        </form>
+      {% endif %}
+
+      <div class="glass-card" style="display:flex; align-items:center; justify-content:space-between; padding:24px;">
+        <div>
+          <h3 class="section-title" style="margin:0;">Activity Log</h3>
+          <p class="caption" style="margin:4px 0 0;">View recent group actions.</p>
+        </div>
+        <button class="btn btn-primary" data-modal-target="#groupActivityModal">View Activity</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Group Activity Modal -->
+<div class="modal-overlay" id="groupActivityModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>Group Activity</h3>
+      <button class="modal-close">&times;</button>
+    </div>
+    <div class="modal-body activity-feed">
+      {% for a in activity %}
+        <div class="activity-item">
+          <span class="badge-pill">{{ a.get_action_display }}</span> <span class="activity-desc">{{ a.user.username }} &mdash; {{ a.description }}</span>
+          <div class="caption">{{ a.timestamp|timesince }} ago</div>
+        </div>
+      {% empty %}
+        <p class="caption">No activity yet.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+{% endblock %}

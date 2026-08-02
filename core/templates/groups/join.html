@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="auth-shell">
+  <div class="glass-card auth-card">
+    <h2 style="text-align:center;">Join a group</h2>
+    <p style="text-align:center; margin-bottom:20px;">Enter the invite code someone shared with you.</p>
+    <form method="post">
+      {% csrf_token %}
+      <div class="field">
+        <input type="text" name="code" placeholder="e.g. A1B2C3D4" required style="text-transform:uppercase;">
+      </div>
+      <button class="btn btn-primary" style="width:100%;" type="submit">Join group</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

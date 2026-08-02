@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="app-layout">
+  <aside class="sidebar glass-panel">
+    <a class="sidebar-link" href="{% url 'dashboard' %}">🏠 Dashboard</a>
+    <a class="sidebar-link" href="{% url 'file_explorer' %}">🗂️ My Files</a>
+    <a class="sidebar-link active" href="{% url 'group_list' %}">👥 Groups</a>
+    <a class="sidebar-link" href="{% url 'trash' %}">🗑️ Trash</a>
+    <a class="sidebar-link" href="{% url 'notifications' %}">🔔 Notifications</a>
+    <a class="sidebar-link" href="{% url 'profile' %}">👤 Profile</a>
+  </aside>
+
+  <div>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+      <div>
+        <h2 class="page-title" style="margin-bottom:4px;">Your Groups</h2>
+        <p class="page-subtitle" style="margin-bottom:0;">Collaborate with your team through shared file groups.</p>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <a href="{% url 'group_join_form' %}"><button class="btn btn-ghost">Join with code</button></a>
+        <a href="{% url 'group_create' %}"><button class="btn btn-primary">Create group</button></a>
+      </div>
+    </div>
+
+    {% if groups %}
+      <div class="grid grid-3">
+        {% for g in groups %}
+          <a href="{% url 'group_detail' g.slug %}" class="group-card-link">
+            <div class="glass-card feature-card">
+              <h3 style="margin-bottom:6px;">{{ g.name }}</h3>
+              <p class="caption" style="margin-bottom:8px;">{{ g.member_count }} member{{ g.member_count|pluralize }} &middot; Code: <strong>{{ g.group_code }}</strong></p>
+              <p style="font-size:14px;">{{ g.description|truncatewords:14 }}</p>
+            </div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state glass-card">
+        <div class="icon">👥</div>
+        <p>You're not in any groups yet. <a href="{% url 'group_create' %}">Create one</a> or join with an invite code.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}
