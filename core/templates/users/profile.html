@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="padding-top:24px; max-width:560px;">
+  <h2>Your Profile</h2>
+
+  <div class="glass-card" style="margin-bottom:20px; display:flex; gap:16px; align-items:center;">
+    <div class="avatar-ring" style="width:56px; height:56px; font-size:20px;">{{ user.username|slice:":1"|upper }}</div>
+    <div>
+      <strong>{{ user.username }}</strong>
+      <p class="caption">{{ user.email }}</p>
+      <p class="caption">{{ file_count }} files &middot; {{ profile.storage_percent }}% of storage used</p>
+    </div>
+  </div>
+
+  <div class="storage-meter"><div class="storage-meter-fill" style="width:{{ profile.storage_percent }}%;"></div></div>
+  <p class="caption" style="margin-bottom:20px;">{{ profile.storage_used|filesizeformat }} of {{ profile.storage_limit|filesizeformat }} used</p>
+
+  <form method="post" enctype="multipart/form-data" class="glass-card">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="field">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+      </div>
+    {% endfor %}
+    <button class="btn btn-primary" type="submit">Save changes</button>
+  </form>
+</div>
+{% endblock %}
