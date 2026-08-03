@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="padding-top:28px; max-width:760px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+    <h2 class="page-title" style="margin:0;">Notifications</h2>
+    <form method="post" action="{% url 'notification_read_all' %}">
+      {% csrf_token %}
+      <button class="btn btn-ghost" type="submit">Mark all read</button>
+    </form>
+  </div>
+
+  {% if notifications %}
+    {% for n in notifications %}
+      <div class="glass-card notification-card {% if not n.is_read %}notification-unread{% endif %}">
+        <div>
+          <span class="badge-pill">{{ n.get_type_display }}</span>
+          <p style="margin:8px 0 4px; font-size:15px;">{{ n.message }}</p>
+          <span class="caption">{{ n.created_at|timesince }} ago</span>
+        </div>
+        {% if not n.is_read %}
+          <form method="post" action="{% url 'notification_read' n.pk %}">
+            {% csrf_token %}
+            <button class="btn btn-ghost btn-sm" type="submit">Mark read</button>
+          </form>
+        {% endif %}
+      </div>
+    {% endfor %}
+  {% else %}
+    <div class="empty-state glass-card"><div class="icon">🔔</div><p>No notifications yet.</p></div>
+  {% endif %}
+</div>
+{% endblock %}
