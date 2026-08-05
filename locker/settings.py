@@ -207,3 +207,7 @@ ACCOUNT_SIGNUP_FIELDS = ['email*', 'password1*', 'password2*']
 ACCOUNT_EMAIL_VERIFICATION = 'none'
 
 SOCIALACCOUNT_LOGIN_ON_GET = True
+
+# Custom adapters for vault-specific onboarding
+ACCOUNT_ADAPTER = 'core.adapters.LockerAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'core.adapters.LockerSocialAccountAdapter'
