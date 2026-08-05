@@ -21,6 +21,9 @@ SECRET_KEY = os.environ.get(
 )
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+if os.environ.get("RENDER"):
+    ALLOWED_HOSTS.append(os.environ.get("RENDER_EXTERNAL_HOSTNAME"))
+    ALLOWED_HOSTS.append(".onrender.com")
 
 # ---------------------------------------------------------------------------
 # Applications
