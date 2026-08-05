@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
+from .decorators import rate_limit
 from .forms import GroupForm, ProfileForm, RegisterForm, VaultFileEditForm, VaultFileUploadForm
 from .models import ActivityLog, Group, GroupMembership, Notification, Profile, Tag, VaultFile
 
@@ -78,7 +79,7 @@ def dashboard(request):
     profile, _ = Profile.objects.get_or_create(user=request.user)
     recent_files = VaultFile.objects.filter(uploaded_by=request.user, is_deleted=False, group__isnull=True)[:8]
     my_groups = request.user.vault_groups.all()[:6]
-    recent_activity = ActivityLog.objects.filter(user=request.user)[:10]
+    recent_activity = ActivityLog.objects.filter(user=request.user).select_related("file", "group")[:10]
     unread_notifications = Notification.objects.filter(user=request.user, is_read=False).count()
     return render(request, "dashboard.html", {
         "profile": profile,
@@ -147,6 +148,7 @@ def file_explorer(request):
 
 
 @login_required
+@rate_limit(max_requests=60, window_seconds=60)
 def file_download(request, pk):
     vfile = get_object_or_404(VaultFile, pk=pk)
     if not _can_access_file(request.user, vfile):
@@ -250,7 +252,7 @@ def group_detail(request, slug):
         raise Http404
     files = group.files.filter(is_deleted=False)
     memberships = GroupMembership.objects.filter(group=group).select_related("user")
-    activity = group.activity_logs.all()[:15]
+    activity = group.activity_logs.select_related("user", "file").all()[:15]
 
     if request.method == "POST" and "file" in request.FILES:
         form = VaultFileUploadForm(request.POST, request.FILES)
@@ -355,7 +357,7 @@ def group_remove_member(request, slug, user_id):
 
 @login_required
 def notification_list(request):
-    notifications = Notification.objects.filter(user=request.user)
+    notifications = Notification.objects.filter(user=request.user).only("id", "message", "type", "is_read", "link", "created_at")
     return render(request, "notifications/list.html", {"notifications": notifications})
 
 
@@ -374,6 +376,7 @@ def notification_read_all(request):
 
 
 @login_required
+@rate_limit(max_requests=120, window_seconds=60)
 def notification_poll(request):
     count = Notification.objects.filter(user=request.user, is_read=False).count()
     return JsonResponse({"unread": count})

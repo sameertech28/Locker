@@ -1,4 +1,5 @@
 from django.urls import path
+from django.views.decorators.cache import never_cache
 
 from . import views
 
@@ -30,7 +31,7 @@ urlpatterns = [
     path("groups/<slug:slug>/members/add/", views.group_add_member, name="group_add_member"),
     path("groups/<slug:slug>/members/<int:user_id>/remove/", views.group_remove_member, name="group_remove_member"),
 
-    # notifications
+    # notifications (API endpoints are rate-limited)
     path("notifications/", views.notification_list, name="notifications"),
     path("notifications/<int:pk>/read/", views.notification_read, name="notification_read"),
     path("notifications/read-all/", views.notification_read_all, name="notification_read_all"),
