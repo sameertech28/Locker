@@ -54,7 +54,7 @@ def register_view(request):
         if form.is_valid():
             user = form.save()
             Profile.objects.get_or_create(user=user)
-            login(request, user)
+            login(request, user, backend='django.contrib.auth.backends.ModelBackend')
             messages.success(request, "Welcome to Locker. Your vault is ready.")
             return redirect("dashboard")
     else:
