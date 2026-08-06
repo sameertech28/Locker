@@ -11,7 +11,7 @@ from django.utils import timezone
 from django.views.decorators.http import require_POST
 
 from .decorators import rate_limit
-from .forms import GroupForm, ProfileForm, RegisterForm, VaultFileEditForm, VaultFileUploadForm
+from .forms import CustomLoginForm, GroupForm, ProfileForm, RegisterForm, VaultFileEditForm, VaultFileUploadForm
 from .models import ActivityLog, Group, GroupMembership, Notification, Profile, Tag, VaultFile
 
 
@@ -65,6 +65,7 @@ def register_view(request):
 class LockerLoginView(LoginView):
     template_name = "auth/login.html"
     redirect_authenticated_user = True
+    form_class = CustomLoginForm
 
 
 def logout_view(request):
