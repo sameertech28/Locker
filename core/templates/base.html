@@ -14,6 +14,9 @@
   <div class="page-shell">
     <nav class="navbar">
       <a href="{% url 'landing' %}" class="brand">🔒 Locker</a>
+      <button class="hamburger" onclick="this.classList.toggle('active');document.querySelector('.nav-links').classList.toggle('open');" aria-label="Menu">
+        <span></span><span></span><span></span>
+      </button>
       <div class="nav-links">
         {% if user.is_authenticated %}
           <a href="{% url 'dashboard' %}">Dashboard</a>
