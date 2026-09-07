@@ -39,4 +39,8 @@ urlpatterns = [
 
     # profile
     path("profile/", views.profile_view, name="profile"),
+
+    # health / keepalive
+    path("health/", views.health_check, name="health_check"),
 ]
+

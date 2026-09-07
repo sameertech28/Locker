@@ -398,3 +398,8 @@ def profile_view(request):
         form = ProfileForm(instance=profile, user=request.user)
     file_count = VaultFile.objects.filter(uploaded_by=request.user, is_deleted=False).count()
     return render(request, "users/profile.html", {"form": form, "profile": profile, "file_count": file_count})
+
+
+def health_check(request):
+    return JsonResponse({"status": "ok", "service": "locker"})
+

@@ -20,10 +20,14 @@ SECRET_KEY = os.environ.get(
     "django-insecure-CHANGE-ME-before-deploying-to-production",
 )
 DEBUG = os.environ.get("DEBUG", "True") == "True"
-ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",") if h.strip()]
+ALLOWED_HOSTS = [h.strip() for h in os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1,testserver,.onrender.com").split(",") if h.strip()]
 if os.environ.get("RENDER"):
-    ALLOWED_HOSTS.append(os.environ.get("RENDER_EXTERNAL_HOSTNAME"))
-    ALLOWED_HOSTS.append(".onrender.com")
+    render_host = os.environ.get("RENDER_EXTERNAL_HOSTNAME")
+    if render_host and render_host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(render_host)
+    if ".onrender.com" not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(".onrender.com")
+
 
 # ---------------------------------------------------------------------------
 # Applications
@@ -175,12 +179,14 @@ DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "vault@locker.app")
 # Production hardening (auto-enabled when DEBUG=False)
 # ---------------------------------------------------------------------------
 if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = os.environ.get("SECURE_SSL_REDIRECT", "True") == "True"
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     X_FRAME_OPTIONS = 'DENY'
+
 
 # ---------------------------------------------------------------------------
 # Allauth / Social Login

@@ -1,3 +1,4 @@
+import sys
 from django.apps import AppConfig
 
 
@@ -7,3 +8,10 @@ class CoreConfig(AppConfig):
 
     def ready(self):
         import core.signals  # noqa: F401
+
+        # Prevent execution during management commands like migrate/collectstatic
+        non_server_cmds = {'migrate', 'makemigrations', 'collectstatic', 'check', 'createsuperuser', 'shell', 'test'}
+        if not any(arg in non_server_cmds for arg in sys.argv):
+            from .keepalive import start_keepalive
+            start_keepalive()
+
